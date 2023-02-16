@@ -1,0 +1,143 @@
+1. "Preparsing data and INFO file generation from raw CSV"
+
+FNC :
+    python preprocessing/FNC_Preparsing.py --data 'data/FNC_Data'  --data_name FNC  --input_file 'FNC_Bin_Dev.csv' --data_type dev
+    python preprocessing/FNC_Preparsing.py --data 'data/FNC_Data'  --data_name FNC  --input_file 'FNC_Bin_Train.csv' --data_type train
+    python preprocessing/FNC_Preparsing.py --data 'data/FNC_Data'  --data_name FNC  --input_file 'FNC_Bin_Test.csv' --data_type test
+
+NELA :
+    python preprocessing/NELA_Preparsing.py --data 'data/NELA_Data'  --data_name NELA  --input_file 'dev.csv' --data_type dev
+    python preprocessing/NELA_Preparsing.py --data 'data/NELA_Data'  --data_name NELA  --input_file 'train.csv' --data_type train
+    python preprocessing/NELA_Preparsing.py --data 'data/NELA_Data'  --data_name NELA  --input_file 'test.csv' --data_type test
+
+ISOT:
+    python preprocessing/ISOT_Preparsing.py --data 'data/ISOT_Data'  --data_name ISOT  --input_file 'ISOT_dev_ver-2.csv' --data_type dev
+    python preprocessing/ISOT_Preparsing.py --data 'data/ISOT_Data'  --data_name ISOT  --input_file 'ISOT_train_ver-2.csv' --data_type train
+    python preprocessing/ISOT_Preparsing.py --data 'data/ISOT_Data'  --data_name ISOT  --input_file 'ISOT_test_ver-2.csv' --data_type test
+    
+2. "Run parsing code"
+  NELA: python preprocessing/parser.py --data  data/NELA_Data/Parsed_Data
+  FNC: python preprocessing/parser.py --data  data/FNC_Data/Parsed_Data
+  ISOT: python preprocessing/parser.py --data data/ISOT_Data/Parsed_Data/
+  
+3.Domain Dependent Feature Generation"
+FNC:
+     python talo_feature_generation/generateFeatures.py --data 'data/FNC_Data'  --data_name FNC  --input_file_train 'FNC_Bin_Train.csv'  --input_file_test 'FNC_Bin_Test.csv' --input_file_dev 'FNC_Bin_Dev.csv'
+
+     # run Talo_merge_feature.ipynb present in data/FNC_Data/processed_data_feature_talo and copy the resultant file in
+     #merged train feature set in data/FNC_Data/Parsed_Data/train
+     #merged test feature set in data/FNC_Data/Parsed_Data/test
+     #merged dev feature set in data/FNC_Data/Parsed_Data/dev
+
+
+
+NELA:
+     python talo_feature_generation/generateFeatures.py --data 'data/NELA_Data'  --data_name NELA  --input_file_train 'train.csv'  --input_file_test 'test.csv' --input_file_dev 'dev.csv'
+
+     # run Talo_merge_feature.ipynb present in data/NELA_Data/processed_data_feature_talo and copy the resultant file in
+     #merged train feature set in data/NELA_Data/Parsed_Data/train
+     #merged test feature set in data/NELA_Data/Parsed_Data/test
+     #merged dev feature set in data/NELA_Data/Parsed_Data/dev
+ISOT:
+        python talo_feature_generation/generateFeatures.py --data 'data/ISOT_Data'  --data_name ISOT  --input_file_train 'ISOT_dev_ver-2.csv'  --input_file_test 'ISOT_test_ver-2.csv' --input_file_dev 'ISOT_dev_ver-2.csv'
+
+        # run Talo_merge_feature.ipynb present in data/ISOT_Data/processed_data_feature_talo and copy the resultant file in
+        #merged train feature set in data/ISOT_Data/Parsed_Data/train
+        #merged test feature set in data/ISOT_Data/Parsed_Data/test
+        #merged dev feature set in data/ISOT_Data/Parsed_Data/dev
+
+
+4. Generating embedding file using pre-trained Glove embedding
+    "Call create_embedding.py to create vocabulary, embedding, and other meta data file over ISOT Data"
+ISOT Data:   python create_embedding.py --data data/ISOT_Data/Parsed_Data   --glove  data/glove/ --emb_name  GLOVE --input_dim 200  --data_name ISOT
+FNC Data:   python create_embedding.py --data data/FNC_Data/Parsed_Data   --glove  data/glove/ --emb_name  GLOVE --input_dim 200  --data_name FNC
+NELA Data:   python create_embedding.py --data data/NELA_Data/Parsed_Data   --glove  data/glove/ --emb_name  GLOVE --input_dim 200  --data_name NELA
+
+
+
+5 Commands to run the different models over different datatsetset.
+
+
+RaSHE(Ui: unidirectional):  RaSHE with Unidirectional LSTM model
+
+ISOT :  python main.py --run_type final --model_name RaSHE_Ui --data data/ISOT_Data/Parsed_Data  --feature_fname ISOT_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name ISOT --max_num_para 5 --max_num_sent 5 --domain_feature 0  --file_len 5000
+
+NELA:   python main.py --run_type final --model_name RaSHE_Ui --data data/NELA_Data/Parsed_Data  --feature_fname NELA_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name NELA --max_num_para 22 --max_num_sent 5 --domain_feature 0  --file_len 5000
+
+FNC:  python main.py --run_type final --model_name RaSHE_Ui --data data/FNC_Bin_Data/Parsed_Data  --feature_fname FNC_Bin_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name FNC_Bin --max_num_para 18 --max_num_sent 5 --domain_feature 0  --file_len 5000
+
+
+
+RaSHE:  RaSHE with Bidirectional LSTM model
+
+ISOT :  python main.py --run_type final --model_name RaSHE --data data/ISOT_Data/Parsed_Data  --feature_fname ISOT_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name ISOT --max_num_para 5 --max_num_sent 5 --domain_feature 0  --file_len 5000
+
+NELA:   python main.py --run_type final --model_name RaSHE --data data/NELA_Data/Parsed_Data  --feature_fname NELA_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name NELA --max_num_para 22 --max_num_sent 5 --domain_feature 0  --file_len 5000
+
+FNC:  python main.py --run_type final --model_name RaSHE --data data/FNC_Bin_Data/Parsed_Data  --feature_fname FNC_Bin_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name FNC_Bin --max_num_para 18 --max_num_sent 5 --domain_feature 0  --file_len 5000
+
+GraSHE_Equa_w =  GraSHE(=)
+
+ISOT :  python main.py --run_type final --model_name GraSHE_Equa_w --data data/ISOT_Data/Parsed_Data  --feature_fname ISOT_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name ISOT --max_num_para 5 --max_num_sent 5 --domain_feature 0  --file_len 5000
+
+NELA:   python main.py --run_type final --model_name GraSHE_Equa_w --data data/NELA_Data/Parsed_Data  --feature_fname NELA_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name NELA --max_num_para 22 --max_num_sent 5 --domain_feature 0  --file_len 5000
+
+FNC:  python main.py --run_type final --model_name GraSHE_Equa_w --data data/FNC_Bin_Data/Parsed_Data  --feature_fname FNC_Bin_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name FNC_Bin --max_num_para 18 --max_num_sent 5 --domain_feature 0  --file_len 5000
+
+GraSHE_Ui_Equa_w = (GraSHE(Ui, =)
+
+ISOT :  python main.py --run_type final --model_name GraSHE_Ui_Equa_w --data data/ISOT_Data/Parsed_Data  --feature_fname ISOT_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name ISOT --max_num_para 5 --max_num_sent 5 --domain_feature 0  --file_len 5000
+
+NELA:   python main.py --run_type final --model_name GraSHE_Ui_Equa_w --data data/NELA_Data/Parsed_Data  --feature_fname NELA_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name NELA --max_num_para 22 --max_num_sent 5 --domain_feature 0  --file_len 5000
+
+FNC:  python main.py --run_type final --model_name GraSHE_Ui_Equa_w --data data/FNC_Bin_Data/Parsed_Data  --feature_fname FNC_Bin_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name FNC_Bin --max_num_para 18 --max_num_sent 5 --domain_feature 0  --file_len 5000
+
+
+GraSHE: 
+
+ISOT :  python main.py --run_type final --model_name GraSHE --data data/ISOT_Data/Parsed_Data  --feature_fname ISOT_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name ISOT --max_num_para 5 --max_num_sent 5 --domain_feature 0  --file_len 5000
+
+NELA:   python main.py --run_type final --model_name GraSHE --data data/NELA_Data/Parsed_Data  --feature_fname NELA_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name NELA --max_num_para 22 --max_num_sent 5 --domain_feature 0  --file_len 5000
+
+FNC:  python main.py --run_type final --model_name GraSHE --data data/FNC_Bin_Data/Parsed_Data  --feature_fname FNC_Bin_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name FNC_Bin --max_num_para 18 --max_num_sent 5 --domain_feature 0  --file_len 5000
+
+
+GraSHE_Ui : Select Gate Entopy with LSTM
+
+ISOT :  python main.py --run_type final --model_name GraSHE_Ui --data data/ISOT_Data/Parsed_Data  --feature_fname ISOT_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name ISOT --max_num_para 5 --max_num_sent 5 --domain_feature 0  --file_len 5000
+
+NELA:   python main.py --run_type final --model_name GraSHE_Ui --data data/NELA_Data/Parsed_Data  --feature_fname NELA_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name NELA --max_num_para 22 --max_num_sent 5 --domain_feature 0  --file_len 5000
+
+FNC:  python main.py --run_type final --model_name GraSHE_Ui --data data/FNC_Bin_Data/Parsed_Data  --feature_fname FNC_Bin_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name FNC_Bin --max_num_para 18 --max_num_sent 5 --domain_feature 0  --file_len 5000
+
+
+HeLSTM model:
+
+ISOT:  python main.py --run_type final --model_name HE_LSTM --data data/ISOT_Data/Parsed_Data  --feature_fname ISOT_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 25 --data_name ISOT --max_num_para 5 --max_num_sent 5 --max_num_word 12 --domain_feature 1 --file_len 5000
+
+NELA: python main.py --run_type final --model_name HE_LSTM --data data/NELA_Data/Parsed_Data  --feature_fname NELA_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name NELA --max_num_para 18 --max_num_sent 5 --domain_feature 1  --file_len 5000 --max_num_word 12
+
+python main.py --run_type final --model_name HE_LSTM --data data/FNC_Data/Parsed_Data  --feature_fname FNC_Bin_train_merged_talo_feature.xlsx --glove  data/glove/ --emb_name  GLOVE --input_dim 200 --mem_dim 100 --hidden_dim 100 --epoch 40 --data_name FNC --max_num_para 18 --max_num_sent 5 --domain_feature 1  --file_len 5000 --max_num_word 12
+
+
+BERT Based Model:
+
+HoBERT: Hierarchy OvER BERT.
+
+First Preprocess the Data As per command in step 1.
+
+NELA DatatSet:  python BERT_embed.py --data data/NELA_Data/Parsed_Data     --data_name NELA
+
+FNC DatatSet: python BERT_embed.py --data data/FNC_Data/Parsed_Data     --data_name FNC
+
+ISOT Dataset: python BERT_embed.py --data data/ISOT_Data/Parsed_Data     --data_name ISOT
+
+
+HoBERT Model:
+
+NELA:  python main_pretrain.py --model_name HoBERT --data data/NELA_Data/Parsed_Data --data_name NELA --mem_dim 100  --input_dim  768 --num_classes 2 --run_type final --epochs 40 --max_num_para 22 --max_num_sent 5 --file_len 5000  --feature_fname NELA_train_merged_talo_feature.xlsx domain_feature 0 
+
+
+FNC:  python main_pretrain.py --model_name HoBERT --data data/FNC_Data/Parsed_Data --data_name FNC --mem_dim 100  --input_dim  768 --num_classes 2 --run_type final --epochs 40  --file_len 5000  --feature_fname FNC_Bin_train_merged_talo_feature.xlsx --max_num_para 18 --max_num_sent 5
+
+ISOT:   python main_pretrain.py --run_type final --model_name HoBERT --data data/ISOT_Data/Parsed_Data --data_name ISOT  --feature_fnameISOT_train_merged_talo_feature.xlsx  --input_dim 768 --mem_dim 100  --epoch 40 --data_name ISOT --max_num_para 5 --max_num_sent 5 --max_num_word 12 --domain_feature 0 --file_len 5000
